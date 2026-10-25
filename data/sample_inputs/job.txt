@@ -1,0 +1,9 @@
+Junior Data Engineer
+Required skills:
+- Python
+- SQL
+- PostgreSQL
+Preferred:
+- AWS
+- Docker
+

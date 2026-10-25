@@ -1,0 +1,2 @@
+Synthetic example: Built a Python data pipeline with pandas and PostgreSQL. Added unit tests with pytest and documented setup in Git.
+
