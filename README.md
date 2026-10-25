@@ -2,11 +2,11 @@
 
 > Evidence-led resume-to-role review. Understand what matches, find document gaps, and improve a draft while keeping every claim yours.
 
-[![Open demo](https://img.shields.io/badge/Interactive%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://rahul2rcf-netizen.github.io/careerlence/)
+[![Open demo](https://img.shields.io/badge/Interactive%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://raw.githack.com/rahul2rcf-netizen/careerlence/main/docs/index.html)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 
-**Pages status:** the demo files and automated deployment workflow are in this repository. GitHub Pages still needs to be enabled once by the repository owner: open **Settings → Pages → Build and deployment → Source → GitHub Actions**. Then re-run the **Deploy CareerLens showcase to GitHub Pages** workflow from the Actions tab. The link above will work after a successful deployment.
+**Live preview:** [Open the static demo](https://raw.githack.com/rahul2rcf-netizen/careerlence/main/docs/index.html). This fallback serves the public `docs/` files through Raw.githack, so it works without enabling GitHub Pages. On a first visit, the host may show an external-content notice; choose **Open the page** to continue. The demo itself uses fictional text and does not upload data. GitHub Pages automation is also included, but requires enabling **Settings → Pages → Build and deployment → Source → GitHub Actions** in the repository.
 
 CareerLens is a practical resume review workspace for one target role at a time. It connects job requirements to text evidence in a resume, makes the score components visible, and provides a human-reviewed improvement loop. It does **not** predict interviews, represent a real applicant-tracking system, or measure a candidate's ability.
 
