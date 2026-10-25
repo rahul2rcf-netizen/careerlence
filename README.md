@@ -33,7 +33,7 @@ The static website in `docs/` is designed for a quick portfolio demo. It include
 - Uses a compact term dictionary and similarity calculation for the demo.
 - Does not call an AI model and is not the full Python analysis engine.
 
-After GitHub Pages is enabled, open the **Interactive demo** badge above.
+Open the **Interactive demo** badge above for the live Raw.githack preview. The same files are also deployable through GitHub Pages after its one-time repository setup.
 
 To preview the static showcase locally:
 
