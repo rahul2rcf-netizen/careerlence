@@ -1,26 +1,59 @@
 # CareerLens AI
 
-[![Open the interactive demo](https://img.shields.io/badge/Live%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://rahul2rcf-netizen.github.io/careerlence/)
+> Evidence-led resume-to-role review. Understand what matches, find document gaps, and improve a draft while keeping every claim yours.
 
-The browser-only showcase uses fictional sample data and illustrative scores; it does not upload a resume. GitHub Pages deployment is configured, but the repository owner must first enable **Settings → Pages → Build and deployment → GitHub Actions**. Once enabled, this URL will serve the interactive demo.
+[![Open demo](https://img.shields.io/badge/Interactive%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://rahul2rcf-netizen.github.io/careerlence/)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 
-**A job-specific resume review loop:** see the evidence in your current resume, identify role-specific gaps, generate an optional AI-edited draft, then compare the score before and after you review the changes.
+**Pages status:** the demo files and automated deployment workflow are in this repository. GitHub Pages still needs to be enabled once by the repository owner: open **Settings → Pages → Build and deployment → Source → GitHub Actions**. Then re-run the **Deploy CareerLens showcase to GitHub Pages** workflow from the Actions tab. The link above will work after a successful deployment.
 
-CareerLens is designed to make the reasoning visible. It does not predict interviews, model a real applicant-tracking system (ATS), or measure a candidate's ability.
+CareerLens is a practical resume review workspace for one target role at a time. It connects job requirements to text evidence in a resume, makes the score components visible, and provides a human-reviewed improvement loop. It does **not** predict interviews, represent a real applicant-tracking system, or measure a candidate's ability.
 
-## What you can do
+## Project at a glance
 
-- Compare a PDF, DOCX, TXT, or pasted resume with one job description.
-- Review matched skills alongside the text evidence that triggered each match.
-- Inspect apparent missing skills and a concrete practice brief grounded in those gaps.
-- Opt in to a Groq-hosted open-weight model for a job-specific rewrite, drawbacks, and improvement suggestions.
-- Edit the draft and compare the original and revised ATS-style estimates using the same scoring formula.
-- Download the analysis or reviewed resume as Markdown or TXT.
-- Try the interface with the included synthetic example without an API key.
+| Area | What it does |
+| --- | --- |
+| Role matching | Compares a resume with one job description and separates detected required and preferred skills. |
+| Evidence | Shows resume text snippets that triggered each detected skill, so matches can be checked. |
+| Gap review | Lists role terms not detected in the document and provides a grounded next-step brief. |
+| Resume enhancement | Offers optional AI-assisted rewriting, drawbacks, and improvement suggestions through Groq. |
+| Before/after review | Recalculates the same ATS-style estimate for the original and the edited draft. |
+| Export | Downloads a Markdown report or a plain-text reviewed draft. |
+| Synthetic preview | Lets visitors explore the interaction without uploading a resume, adding a key, or calling an AI service. |
 
-## Quick start
+## Two ways to explore CareerLens
 
-Python 3.11 or newer is required.
+### 1. Interactive browser showcase
+
+The static website in `docs/` is designed for a quick portfolio demo. It includes an editable synthetic resume and job posting, a browser-side match report, tabs for skills and gaps, evidence, and improvement guidance, plus an illustrative rewrite and before/after estimate.
+
+- Uses fictional example text.
+- Runs locally in the browser; it sends no resume or job text to a server.
+- Uses a compact term dictionary and similarity calculation for the demo.
+- Does not call an AI model and is not the full Python analysis engine.
+
+After GitHub Pages is enabled, open the **Interactive demo** badge above.
+
+To preview the static showcase locally:
+
+```powershell
+py -m http.server 8000 --directory docs
+```
+
+Then visit [http://localhost:8000](http://localhost:8000).
+
+### 2. Full Streamlit application
+
+#### Requirements
+
+- Python 3.11 or newer
+- Packages in `requirements.txt`
+- Optional Groq API key only for AI enhancement
+
+#### Install and run
+
+**Windows PowerShell**
 
 ```powershell
 py -3.11 -m venv .venv
@@ -30,33 +63,69 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-Select **Try the synthetic example**, then **Analyze this role** to explore the report and before/after workflow. The example is fictional and contains no real resume data.
+**macOS / Linux**
 
-## Optional AI resume enhancer
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
 
-The enhancer uses Groq's OpenAI-compatible API with `openai/gpt-oss-20b`, an open-weight model. Groq currently offers a free tier with rate limits; quotas and model access can change. You can provide a key in the app's password field, or configure `GROQ_API_KEY` as an environment variable / Streamlit secret. Create a key at [Groq Console](https://console.groq.com/keys).
+#### Recommended walkthrough
 
-For local Streamlit secrets, create `.streamlit/secrets.toml` (it is ignored by Git) with:
+1. Choose **Try the synthetic example** to load fictional resume and role data.
+2. Select **Analyze this role**.
+3. Review the score components, matched requirements, evidence snippets, and apparent gaps.
+4. Open the report and verify the extracted text and requirement grouping before acting on it.
+5. If you have configured a Groq key and want AI help, explicitly opt in to the disclosure and generate an enhanced draft.
+6. Read the model's drawbacks and suggestions. Edit the draft so every statement remains accurate.
+7. Compare the original and revised estimates. Choose **Use draft as my new resume** only when you accept the changes.
+8. Download the analysis or reviewed draft if useful.
+
+You can also paste resume text directly, or upload PDF, DOCX, or TXT files. Scanned PDFs require OCR, which is not included.
+
+## AI resume enhancer (optional)
+
+The enhancer uses Groq's OpenAI-compatible API with the open-weight `openai/gpt-oss-20b` model. It can draft role-specific wording, flag unsupported requirements, and offer improvement suggestions. Check the provider's current model availability and limits before use.
+
+1. Create a key in the [Groq Console](https://console.groq.com/keys).
+2. Enter it in the app's password field, or configure it as an environment variable / Streamlit secret.
+3. Keep the explicit consent checkbox selected only when you want to send resume and job text to Groq.
+4. Check every generated claim against the original resume.
+
+For local Streamlit secrets, create `.streamlit/secrets.toml` (ignored by Git) with:
 
 ```toml
 GROQ_API_KEY = "your-key"
 ```
 
-No API key is required to use local matching, view evidence, or try the synthetic example. AI enhancement stays disabled until a key is provided and the user explicitly opts in to sending the resume and job text to Groq. Do not add API keys to source files or commit them.
+Or copy `.env.example` and configure the key in your environment. **Never commit API keys.** The local matcher, evidence view, synthetic example, and static showcase work without a key.
 
-The model is instructed to preserve source facts and not invent qualifications, dates, metrics, or results. AI can still make mistakes: inspect every claim before using a draft. The original resume is kept intact until the user chooses **Use draft as my new resume**.
+The model is instructed not to invent credentials, dates, metrics, or results, but AI can still be wrong. The original resume remains intact unless you choose to apply the reviewed draft.
 
-## Scoring
+## How the estimate works
 
-`score = 100 × (0.60 × required coverage + 0.15 × preferred coverage + 0.25 × TF-IDF cosine similarity)`.
+The full application uses the same formula for the original and revised text:
 
-The same local formula is applied to the original and the reviewed draft. Coverage counts distinct detected dictionary skills; TF-IDF measures word overlap. The estimate may increase when relevant wording is clearer, but this is not evidence of improved qualifications or an actual ATS score. Keyword presence does not prove competence.
+```
+score = 100 × (
+    0.60 × required skill coverage
+  + 0.15 × preferred skill coverage
+  + 0.25 × TF-IDF cosine similarity
+)
+```
+
+Coverage counts distinct skills recognized by the project's dictionary. TF-IDF estimates text overlap. The estimate may change when wording is clearer, but it is **not an actual ATS score, hiring prediction, or evidence of stronger qualifications**. Keyword presence does not prove competence. See [scoring methodology](docs/scoring-methodology.md).
 
 ## Privacy and limitations
 
-Local analysis processes uploaded files in memory and does not send resume text to a model. If the user supplies an API key, checks the disclosure, and requests AI enhancement, the resume and job description are sent to Groq. Groq says inference inputs and outputs are not retained by default, with limited temporary logging possible for service reliability and abuse monitoring; read [Groq's data controls](https://console.groq.com/docs/your-data) before using it with personal data. Remove personal or confidential details you do not want to share.
-
-No database is used by this application. Streamlit keeps current UI state for the active session. Scanned PDFs need OCR, which is not included. Skill detection uses a small English dictionary, job requirement grouping is a text heuristic, and TF-IDF can miss equivalent meanings. Review extracted text, classified requirements, evidence, and AI output.
+- The full app processes local uploads in memory and does not send text to an AI model during normal matching.
+- When you provide a Groq key, explicitly opt in, and request enhancement, the resume and job description are sent to Groq. Review [Groq's data controls](https://console.groq.com/docs/your-data) before using personal information.
+- No database is used. Streamlit holds UI state for the active session.
+- Skill detection uses a limited English vocabulary. Requirement grouping is heuristic and TF-IDF can miss equivalent wording.
+- Review extracted text, evidence, requirement grouping, and every AI-generated claim.
 
 ## Development
 
@@ -65,13 +134,17 @@ python -m pytest
 python -m ruff check .
 ```
 
-## Project structure
+## Repository map
 
-- `app.py`: Streamlit interface and analysis flow.
-- `src/careerlens/analysis.py`: requirement heuristic and transparent scoring.
-- `src/careerlens/ai_enhancer.py`: opt-in Groq request and response validation.
-- `src/careerlens/extraction.py`: PDF, DOCX, and TXT extraction.
-- `src/careerlens/skills.py`: skill vocabulary, aliases, and evidence detection.
-- `src/careerlens/report.py`: Markdown report export.
-- `tests/`: synthetic behavior checks.
+- `app.py` — Streamlit interface and review workflow.
+- `src/careerlens/analysis.py` — requirement grouping and transparent score.
+- `src/careerlens/ai_enhancer.py` — opt-in Groq call and response validation.
+- `src/careerlens/extraction.py` — PDF, DOCX, and TXT text extraction.
+- `src/careerlens/skills.py` — skill aliases, detection, and evidence.
+- `src/careerlens/report.py` — Markdown report export.
+- `docs/` — static showcase, scoring notes, architecture, and evaluation notes.
+- `tests/` — synthetic behavior checks.
 
+## License
+
+See [LICENSE](LICENSE) if present in this repository.
