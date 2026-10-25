@@ -5,6 +5,7 @@ CareerLens AI is a local-first, explainable resume-to-job alignment tool for ear
 ## Features
 
 - PDF, DOCX, and TXT extraction plus pasted text; extracted resume text can be reviewed.
+- Editable extracted resume text, a synthetic sample workflow, and a compact three-part results view.
 - Dictionary-based skill extraction with aliases, categories, evidence snippets, and word boundaries.
 - Required and preferred coverage, TF-IDF cosine similarity, visible score components, and apparent gaps.
 - Resume-specific wording suggestions, gap-grounded project scope, and Markdown report export.
@@ -22,6 +23,10 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
+## Optional hosted demo
+
+The app is ready to deploy from this repository with Streamlit Community Cloud: select the repository's `main` branch and `app.py` as the entry point. Hosting requires an account on that service. No live deployment URL is published by this project yet.
+
 ## Tests and quality
 
 ```powershell
@@ -36,6 +41,10 @@ The repository includes synthetic tests for aliases, false-positive boundaries, 
 `score = 100 × (0.60 × required coverage + 0.15 × preferred coverage + 0.25 × TF-IDF cosine similarity)`.
 
 Coverage is the share of distinct dictionary skills in a group also detected in the resume. If a group has no detected items, its coverage is zero. TF-IDF is computed over the two supplied texts with English stop words; empty vocabularies yield zero. The result is clamped by its components to 0–100. Exact weights are visible in the interface. Keyword presence is not proof of competence, and text similarity can reward generic overlap.
+
+## Sample workflow
+
+Start the app, select **Try the synthetic example**, and click **Analyze this role**. Explore the overview, skills and evidence, and improvement tabs. Upload your own supported resume file or paste resume text, edit the extracted text if needed, then paste a job description and analyze again. The included sample documents are fictional and contain no real candidate data.
 
 ## Architecture
 
