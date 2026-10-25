@@ -1,5 +1,9 @@
 # CareerLens AI
 
+[![Open the interactive demo](https://img.shields.io/badge/Live%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://rahul2rcf-netizen.github.io/careerlence/)
+
+> Explore the browser-only showcase with fictional sample data. The production-style analysis workflow is available in the Streamlit app; the demo clearly labels illustrative scores and does not upload your resume.
+
 **A job-specific resume review loop:** see the evidence in your current resume, identify role-specific gaps, generate an optional AI-edited draft, then compare the score before and after you review the changes.
 
 CareerLens is designed to make the reasoning visible. It does not predict interviews, model a real applicant-tracking system (ATS), or measure a candidate's ability.
