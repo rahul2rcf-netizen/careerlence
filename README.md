@@ -52,7 +52,7 @@ Automated tests provide behavioral checks, not predictive quality metrics. No ma
 
 ## Privacy and limitations
 
-Files are read from the upload in memory and are not saved by the app. No resume text is logged or sent to an external AI provider. Streamlit session state keeps the current analysis while the session is active; users should run the app on a trusted local machine. This is not a formal security audit. Scanned PDFs need OCR, which is not included. Password-protected or damaged files may fail extraction. Skill coverage is limited to the maintained dictionary; requirement grouping uses section words and may need manual correction. Project recommendations are intentionally omitted rather than generated generically.
+Files are read from the upload in memory and are not saved by the app. No resume text is logged or sent to an external AI provider. Streamlit session state keeps the current analysis while the session is active; users should run the app on a trusted local machine. This is not a formal security audit. Scanned PDFs need OCR, which is not included. Password-protected or damaged files may fail extraction. Skill coverage is limited to the maintained dictionary; requirement grouping uses section words and may need manual correction. Any suggested project brief is based on detected gaps; candidates should only list it after doing the work.
 
 ## Future work
 
