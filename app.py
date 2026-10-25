@@ -10,6 +10,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from careerlens.analysis import analyze
+from careerlens.ai_enhancer import configured_api_key, enhance_resume
 from careerlens.extraction import extract_upload
 from careerlens.report import markdown
 
@@ -64,7 +65,23 @@ with st.sidebar:
         "This measures document alignment. It is not a hiring probability, a competence test, or a measure of your worth."
     )
     st.markdown("**Privacy**")
-    st.caption("No database or external model is used. Uploaded files are processed in memory by this app.")
+    st.caption("Local analysis uses no external model. Resume text leaves this app only if you opt into AI enhancement.")
+    st.divider()
+    st.markdown("**AI resume enhancer**")
+    st.caption("Groq-hosted open-weight model · free tier, rate-limited")
+    groq_key = st.text_input(
+        "Groq API key (optional)",
+        type="password",
+        value="",
+        key="groq_api_key_input",
+        help="Use a key from console.groq.com. The app does not save it to the repository.",
+    )
+
+if "pending_resume" in st.session_state:
+    st.session_state.resume_text = st.session_state.pop("pending_resume")
+    st.session_state.pop("analysis_result", None)
+    st.session_state.pop("enhanced_resume", None)
+    st.session_state.pop("enhancement_notes", None)
 
 if st.button(
     "Try the synthetic example", help="Loads the sample resume and job description included with the project."
@@ -129,18 +146,20 @@ if "analysis_result" in st.session_state:
     st.divider()
     st.markdown('<div class="step">03 / Your analysis</div>', unsafe_allow_html=True)
     st.title(result.title)
-    st.caption("Estimated document-to-job alignment")
-    st.progress(result.score / 100, text=f"{result.score} / 100")
+    st.caption("ATS-style document match estimate · not a hiring prediction")
+    st.progress(result.score / 100, text=f"Match estimate  {result.score} / 100")
 
     m1, m2, m3 = st.columns(3, gap="medium")
     m1.metric("Required skill coverage", f"{result.required_coverage}%")
     m2.metric("Preferred skill coverage", f"{result.preferred_coverage}%")
     m3.metric("Text similarity", f"{result.text_similarity}%")
     st.caption(
-        "Formula: 60% required coverage + 15% preferred coverage + 25% TF-IDF cosine similarity. A high score does not guarantee suitability or selection."
+        "ATS-style estimate: 60% required coverage + 15% preferred coverage + 25% TF-IDF similarity. This is a document comparison, not a real ATS result or hiring probability."
     )
 
-    overview, evidence, next_steps = st.tabs(["At a glance", "Skills & evidence", "Improve before applying"])
+    overview, evidence, next_steps, enhancer = st.tabs(
+        ["Match report", "Evidence check", "Action plan", "AI resume enhancer"]
+    )
     with overview:
         left, right = st.columns(2, gap="large")
         with left:
@@ -171,22 +190,110 @@ if "analysis_result" in st.session_state:
         st.write(", ".join(skill.name for skill in result.extra) or "None detected")
         st.caption("Dictionary matches show text evidence, not proof of proficiency.")
     with next_steps:
-        st.markdown("#### Resume-specific edits")
+        st.markdown("#### Make the evidence easier to see")
         for recommendation in result.recommendations:
             st.markdown(f"- {recommendation}")
-        st.markdown("#### A project brief based on this role")
+        st.markdown("#### Close a skill gap with real evidence")
         if result.projects:
             project = result.projects[0]
-            st.markdown(f"**{project['name']}**")
-            st.write(project["problem"])
-            st.write("**Objective:** " + project["objective"])
-            st.write("**Skills:** " + ", ".join(project["skills"]))
-            st.write("**Minimum scope:** " + project["scope"])
-            st.write("**Evidence to produce:** " + project["evidence"])
-            st.caption(project["before_listing"])
+            st.markdown(f"**{project['name']} · practice brief**")
+            st.write(project["objective"])
+            st.write("**Build:** " + project["scope"])
+            st.write("**Show:** " + project["evidence"])
+            st.caption("Only add this experience to your resume after you have completed it.")
         else:
             st.write(
                 "No skill gap was detected to ground a project brief in. Review the job text and choose a real problem before starting a project."
+            )
+
+    with enhancer:
+        st.markdown("#### Tailor the wording, keep the facts yours")
+        st.write(
+            "Generate a job-specific draft from your resume and the posting. Your original remains unchanged until you choose to apply the draft. Review every claim before using it."
+        )
+        consent = st.checkbox(
+            "I understand that using AI sends my resume and the target job description to Groq for processing. I have removed personal or confidential details I do not want to share.",
+            key="groq_privacy_consent",
+        )
+        key_available = bool(groq_key.strip() or configured_api_key())
+        if not key_available:
+            st.info(
+                "Add your own free Groq API key in the sidebar to generate an AI draft. The sample match report works without a key."
+            )
+        if st.button(
+            "Generate a fact-grounded draft",
+            type="primary",
+            disabled=not (consent and key_available),
+            key="generate_resume_draft",
+        ):
+            try:
+                with st.spinner("Reviewing the resume against this role…"):
+                    draft = enhance_resume(
+                        resume, job, groq_key.strip() or configured_api_key() or ""
+                    )
+                st.session_state.pop("reviewed_resume_draft", None)
+                st.session_state.enhanced_resume = draft["enhanced_resume"]
+                st.session_state.enhancement_notes = draft
+                st.session_state.enhancement_source = resume
+            except Exception as exc:
+                st.error(str(exc))
+
+        if st.session_state.get("enhancement_source") and st.session_state.enhancement_source != resume:
+            st.info("Your source resume changed after this draft was created. Generate a fresh draft for the latest version.")
+        elif st.session_state.get("enhanced_resume"):
+            notes = st.session_state.enhancement_notes
+            if notes.get("drawbacks"):
+                st.markdown("**Drawbacks to address**")
+                for item in notes["drawbacks"]:
+                    st.markdown(f"- {item}")
+            if notes.get("improvements"):
+                st.markdown("**Suggested improvements**")
+                for item in notes["improvements"]:
+                    st.markdown(f"- {item}")
+            if notes.get("unsupported_job_skills"):
+                st.warning(
+                    "The job asks for these skills, but they are not supported by the original resume. Do not claim them without real experience: "
+                    + ", ".join(notes["unsupported_job_skills"])
+                )
+            st.markdown("**Review and edit the proposed resume**")
+            draft_text = st.text_area(
+                "AI draft · editable",
+                value=st.session_state.enhanced_resume,
+                height=320,
+                key="reviewed_resume_draft",
+            )
+            after = analyze(draft_text, job, title or "Role")
+            before_col, after_col = st.columns(2, gap="medium")
+            before_col.metric("Before · ATS-style estimate", f"{result.score}/100")
+            after_col.metric(
+                "After · reviewed draft",
+                f"{after.score}/100",
+                delta=f"{after.score - result.score:+.1f} points",
+            )
+            score_left, score_right = st.columns(2, gap="medium")
+            score_left.caption(
+                f"Before: required {result.required_coverage}% · preferred {result.preferred_coverage}% · wording {result.text_similarity}%"
+            )
+            score_right.caption(
+                f"After: required {after.required_coverage}% · preferred {after.preferred_coverage}% · wording {after.text_similarity}%"
+            )
+            st.caption(
+                "Both versions use the same transparent local formula. A higher score can reflect wording overlap, not stronger qualifications."
+            )
+            action_left, action_right = st.columns(2)
+            action_left.download_button(
+                "Download reviewed draft · TXT",
+                draft_text,
+                file_name="careerlens-reviewed-resume.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+            if action_right.button("Use draft as my new resume", use_container_width=True):
+                st.session_state.pending_resume = draft_text
+                st.session_state.pop("analysis_result", None)
+                st.rerun()
+            st.warning(
+                "AI can make mistakes. Check dates, tools, metrics, and every claim against your real experience before applying."
             )
 
     with report_col:
