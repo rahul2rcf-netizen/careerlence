@@ -67,6 +67,8 @@ def enhance_resume(resume: str, job: str, api_key: str) -> dict:
         result = json.loads(content)
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
         raise RuntimeError("The model did not return the expected resume draft.") from exc
+    if not isinstance(result, dict):
+        raise RuntimeError("The model returned an invalid resume draft format.")
     if not isinstance(result.get("enhanced_resume"), str) or not result["enhanced_resume"].strip():
         raise RuntimeError("The model did not return a resume draft.")
     for key in ("improvements", "drawbacks", "unsupported_job_skills"):
