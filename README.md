@@ -1,19 +1,22 @@
 # CareerLens AI
 
-CareerLens AI is a local-first, explainable resume-to-job alignment tool for early-career applicants. It helps answer which listed requirements appear in a resume, where the document supports those matches, and which terms were not detected. It does not predict hiring outcomes or measure a person's ability.
+**A job-specific resume review loop:** see the evidence in your current resume, identify role-specific gaps, generate an optional AI-edited draft, then compare the score before and after you review the changes.
 
-## Features
+CareerLens is designed to make the reasoning visible. It does not predict interviews, model a real applicant-tracking system (ATS), or measure a candidate's ability.
 
-- PDF, DOCX, and TXT extraction plus pasted text; extracted resume text can be reviewed.
-- Editable extracted resume text, a synthetic sample workflow, and a compact three-part results view.
-- Dictionary-based skill extraction with aliases, categories, evidence snippets, and word boundaries.
-- Required and preferred coverage, TF-IDF cosine similarity, visible score components, and apparent gaps.
-- Resume-specific wording suggestions, gap-grounded project scope, and Markdown report export.
-- Local processing without an external model API or database.
+## What you can do
 
-## Install and run
+- Compare a PDF, DOCX, TXT, or pasted resume with one job description.
+- Review matched skills alongside the text evidence that triggered each match.
+- Inspect apparent missing skills and a concrete practice brief grounded in those gaps.
+- Opt in to a Groq-hosted open-weight model for a job-specific rewrite, drawbacks, and improvement suggestions.
+- Edit the draft and compare the original and revised ATS-style estimates using the same scoring formula.
+- Download the analysis or reviewed resume as Markdown or TXT.
+- Try the interface with the included synthetic example without an API key.
 
-Python 3.11 or newer is required. From the project directory:
+## Quick start
+
+Python 3.11 or newer is required.
 
 ```powershell
 py -3.11 -m venv .venv
@@ -23,47 +26,48 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-## Optional hosted demo
+Select **Try the synthetic example**, then **Analyze this role** to explore the report and before/after workflow. The example is fictional and contains no real resume data.
 
-The app is ready to deploy from this repository with Streamlit Community Cloud: select the repository's `main` branch and `app.py` as the entry point. Hosting requires an account on that service. No live deployment URL is published by this project yet.
+## Optional AI resume enhancer
 
-## Tests and quality
+The enhancer uses Groq's OpenAI-compatible API with `openai/gpt-oss-20b`, an open-weight model. Groq currently offers a free tier with rate limits; quotas and model access can change. You can provide a key in the app's password field, or configure `GROQ_API_KEY` as an environment variable / Streamlit secret. Create a key at [Groq Console](https://console.groq.com/keys).
+
+For local Streamlit secrets, create `.streamlit/secrets.toml` (it is ignored by Git) with:
+
+```toml
+GROQ_API_KEY = "your-key"
+```
+
+No API key is required to use local matching, view evidence, or try the synthetic example. AI enhancement stays disabled until a key is provided and the user explicitly opts in to sending the resume and job text to Groq. Do not add API keys to source files or commit them.
+
+The model is instructed to preserve source facts and not invent qualifications, dates, metrics, or results. AI can still make mistakes: inspect every claim before using a draft. The original resume is kept intact until the user chooses **Use draft as my new resume**.
+
+## Scoring
+
+`score = 100 × (0.60 × required coverage + 0.15 × preferred coverage + 0.25 × TF-IDF cosine similarity)`.
+
+The same local formula is applied to the original and the reviewed draft. Coverage counts distinct detected dictionary skills; TF-IDF measures word overlap. The estimate may increase when relevant wording is clearer, but this is not evidence of improved qualifications or an actual ATS score. Keyword presence does not prove competence.
+
+## Privacy and limitations
+
+Local analysis processes uploaded files in memory and does not send resume text to a model. If the user supplies an API key, checks the disclosure, and requests AI enhancement, the resume and job description are sent to Groq. Groq says inference inputs and outputs are not retained by default, with limited temporary logging possible for service reliability and abuse monitoring; read [Groq's data controls](https://console.groq.com/docs/your-data) before using it with personal data. Remove personal or confidential details you do not want to share.
+
+No database is used by this application. Streamlit keeps current UI state for the active session. Scanned PDFs need OCR, which is not included. Skill detection uses a small English dictionary, job requirement grouping is a text heuristic, and TF-IDF can miss equivalent meanings. Review extracted text, classified requirements, evidence, and AI output.
+
+## Development
 
 ```powershell
 python -m pytest
 python -m ruff check .
 ```
 
-The repository includes synthetic tests for aliases, false-positive boundaries, duplicate skill mentions, coverage, evidence, zero-vector behavior, input validation, normalization, and report export. The `data/sample_inputs/` pair is synthetic and can be pasted into the app. No real resume data is included.
+## Project structure
 
-## Scoring methodology
-
-`score = 100 × (0.60 × required coverage + 0.15 × preferred coverage + 0.25 × TF-IDF cosine similarity)`.
-
-Coverage is the share of distinct dictionary skills in a group also detected in the resume. If a group has no detected items, its coverage is zero. TF-IDF is computed over the two supplied texts with English stop words; empty vocabularies yield zero. The result is clamped by its components to 0–100. Exact weights are visible in the interface. Keyword presence is not proof of competence, and text similarity can reward generic overlap.
-
-## Sample workflow
-
-Start the app, select **Try the synthetic example**, and click **Analyze this role**. Explore the overview, skills and evidence, and improvement tabs. Upload your own supported resume file or paste resume text, edit the extracted text if needed, then paste a job description and analyze again. The included sample documents are fictional and contain no real candidate data.
-
-## Architecture
-
-- `app.py`: Streamlit input and result presentation.
-- `src/careerlens/extraction.py`: upload validation, extraction, and whitespace normalization.
-- `src/careerlens/skills.py`: editable skill taxonomy and evidence detection.
-- `src/careerlens/analysis.py`: requirement heuristic, scoring, and grounded recommendations.
-- `src/careerlens/report.py`: Markdown export.
-- `tests/`: synthetic unit checks.
-
-## Evaluation
-
-Automated tests provide behavioral checks, not predictive quality metrics. No manually reviewed benchmark has been run, so precision, recall, and F1 are not claimed. Before relying on this tool for broader comparisons, curate and manually label a representative dataset of resume/job pairs, then report per-skill extraction precision/recall and gap error counts. The dictionary and section heuristic are currently narrow and English-centric.
-
-## Privacy and limitations
-
-Files are read from the upload in memory and are not saved by the app. No resume text is logged or sent to an external AI provider. Streamlit session state keeps the current analysis while the session is active; users should run the app on a trusted local machine. This is not a formal security audit. Scanned PDFs need OCR, which is not included. Password-protected or damaged files may fail extraction. Skill coverage is limited to the maintained dictionary; requirement grouping uses section words and may need manual correction. Any suggested project brief is based on detected gaps; candidates should only list it after doing the work.
-
-## Future work
-
-Improve editable requirement extraction, grow the taxonomy with reviewed examples, and evaluate against a manually labeled dataset before considering semantic embeddings. A deployment should follow a privacy and hosting review.
+- `app.py`: Streamlit interface and analysis flow.
+- `src/careerlens/analysis.py`: requirement heuristic and transparent scoring.
+- `src/careerlens/ai_enhancer.py`: opt-in Groq request and response validation.
+- `src/careerlens/extraction.py`: PDF, DOCX, and TXT extraction.
+- `src/careerlens/skills.py`: skill vocabulary, aliases, and evidence detection.
+- `src/careerlens/report.py`: Markdown report export.
+- `tests/`: synthetic behavior checks.
 
