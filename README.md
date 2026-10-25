@@ -2,7 +2,7 @@
 
 [![Open the interactive demo](https://img.shields.io/badge/Live%20demo-Open%20CareerLens-0B6B5E?style=for-the-badge)](https://rahul2rcf-netizen.github.io/careerlence/)
 
-> Explore the browser-only showcase with fictional sample data. The production-style analysis workflow is available in the Streamlit app; the demo clearly labels illustrative scores and does not upload your resume.
+The browser-only showcase uses fictional sample data and illustrative scores; it does not upload a resume. GitHub Pages deployment is configured, but the repository owner must first enable **Settings → Pages → Build and deployment → GitHub Actions**. Once enabled, this URL will serve the interactive demo.
 
 **A job-specific resume review loop:** see the evidence in your current resume, identify role-specific gaps, generate an optional AI-edited draft, then compare the score before and after you review the changes.
 
