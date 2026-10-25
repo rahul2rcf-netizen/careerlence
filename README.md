@@ -145,6 +145,3 @@ python -m ruff check .
 - `docs/` — static showcase, scoring notes, architecture, and evaluation notes.
 - `tests/` — synthetic behavior checks.
 
-## License
-
-See [LICENSE](LICENSE) if present in this repository.
